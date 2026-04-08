@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tareas_db
+      MYSQL_USER: tarea_user
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+  backend:
+    build: ./backend-node-docker
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_USER=tarea_user
+      - DB_PASSWORD=root
+      - DB_NAME=tareas_db
+    volumes:
+      - ./backend-node-docker/:/usr/src/app
+volumes:
+  mysql_data:
