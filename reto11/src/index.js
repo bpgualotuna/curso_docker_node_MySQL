@@ -1,31 +1,30 @@
 require("dotenv").config();
 
 const express = require("express");
+const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
 const jwtSecret = process.env.JWT_SECRET;
 
-const tareaRoutes = require("./routes/tareaRoutes");
+const libroRoutes = require("./routes/libroRoutes");
 const authRoutes = require("./routes/authRoutes");
 const cors = require("cors");
 
 const {apiReference} = require('@scalar/express-api-reference');
-
 
 const corsOptions = {
     origin: "http://localhost:3000" || process.env.CORS_ORIGIN,
     credentials: true,
 };
 
-
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("API Backend Funcionando");
+    res.send("API Biblioteca Digital Funcionando");
 });
-//CORREGIR< ELIMINAR /auth de las rutas
+
 console.log("Registrando rutas /api...");
-app.use("/api", tareaRoutes);
+app.use("/api", libroRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use('/reference', apiReference({
@@ -49,7 +48,7 @@ app.use('/reference', apiReference({
 
 app.get('/openapi.yaml', (req, res) => {
     res.setHeader('Content-Type', 'application/x-yaml');
-    res.sendFile(path.join(__dirname, 'openapi.yaml'));
+    res.sendFile(path.join(__dirname, '..', 'docs', 'openapi.yaml'));
 });
 
 console.log("Rutas registradas correctamente");

@@ -1,0 +1,190 @@
+openapi: 3.0.0
+info:
+  title: API Biblioteca Digital
+  version: 1.0.0
+  description: API para la gestión de usuarios y libros con autenticación JWT
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar un usuario
+      description: Registra un nuevo usuario con email y contraseña
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: usuario@test.com
+                password:
+                  type: string
+                  example: "123456"
+              required:
+                - email
+                - password
+      responses:
+        "201":
+          description: Usuario registrado exitosamente
+        "500":
+          description: Error al registrar usuario
+
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Inicia sesión con email y contraseña, devuelve un token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: usuario@test.com
+                password:
+                  type: string
+                  example: "123456"
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: Sesión iniciada exitosamente
+        "500":
+          description: Error al iniciar sesión
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Autenticación
+      summary: Cerrar sesión
+      description: Revoca el token JWT actual del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Usuario deslogueado exitosamente
+        "401":
+          description: Token no proporcionado
+
+  /api/libros:
+    get:
+      tags:
+        - Libros
+      summary: Obtener todos los libros
+      description: Devuelve la lista de todos los libros disponibles. Solo para usuarios autenticados.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Libros obtenidos correctamente
+        "401":
+          description: Token no proporcionado o revocado
+        "403":
+          description: Token inválido
+
+    post:
+      tags:
+        - Libros
+      summary: Crear un libro
+      description: Crea un nuevo libro en la biblioteca. Requiere autenticación.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                  example: Cien Años de Soledad
+                autor:
+                  type: string
+                  example: Gabriel García Márquez
+                categoria:
+                  type: string
+                  example: Novela
+                descripcion:
+                  type: string
+                  example: Una obra maestra de la literatura latinoamericana
+              required:
+                - titulo
+                - autor
+                - categoria
+      responses:
+        "201":
+          description: Libro creado correctamente
+        "401":
+          description: Token no proporcionado o revocado
+        "500":
+          description: Error al crear el libro
+
+  /api/libros/{id}:
+    get:
+      tags:
+        - Libros
+      summary: Obtener un libro por ID
+      description: Devuelve un libro específico por su ID. Requiere autenticación.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Libro obtenido correctamente
+        "400":
+          description: El ID no es un número válido
+        "404":
+          description: Libro no encontrado
+        "401":
+          description: Token no proporcionado o revocado
+
+    delete:
+      tags:
+        - Libros
+      summary: Eliminar un libro
+      description: Elimina un libro por su ID. Requiere autenticación.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Libro eliminado correctamente
+        "400":
+          description: El ID no es un número válido
+        "401":
+          description: Token no proporcionado o revocado
+        "500":
+          description: Error al eliminar el libro
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
